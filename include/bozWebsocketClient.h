@@ -17,7 +17,7 @@ class bozWebsocketClient : public QObject {
     Q_OBJECT
     
 public:
-    bozWebsocketClient(QObject *parent=0);
+    explicit bozWebsocketClient(QObject *parent=Q_NULLPTR);
     ~bozWebsocketClient();
     virtual void connectToHost(const QHostAddress & address, quint16 port);    
     virtual void disconnectFromHost();
