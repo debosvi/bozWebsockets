@@ -11,6 +11,8 @@
 
 namespace BOZ {
     
+class bozWebsocketClientPrivate;    
+    
 class bozWebsocketClient : public QObject {
     Q_OBJECT
     
@@ -21,7 +23,9 @@ public:
     virtual void disconnectFromHost();
     
 private:
-    int _fd;
+    bozWebsocketClientPrivate* const d_ptr;
+    Q_DECLARE_PRIVATE(bozWebsocketClient)
+    Q_DISABLE_COPY(bozWebsocketClient)
 };
 
 } // NAMESPACE

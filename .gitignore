@@ -17,3 +17,6 @@
 moc_*.cpp
 qrc_*.cpp
 *-build-*
+
+# boz specific
+build

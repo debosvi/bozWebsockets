@@ -1,13 +1,15 @@
 
-# include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 set(BOZ_WS_CLIENT_LIB bozWsClient)
 
 set(BOZ_WS_CLIENT_HDRS 
     ${PROJECT_SOURCE_DIR}/include/bozWebsocketClient.h
+    bozWsClient_p.h
     )
 
 set(BOZ_WS_CLIENT_SRCS 
+    bozWsClient_p.cpp
     bozWsConstructor.cpp
     bozWsConnect.cpp
     )
