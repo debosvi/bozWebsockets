@@ -1,5 +1,6 @@
 
 #include "bozWsClient_p.h"
+#include "bozWebsocketClient.h"
 #include "bozWsThread.h"
 
 namespace BOZ {
@@ -9,16 +10,19 @@ bozWebsocketClientPrivate::bozWebsocketClientPrivate(bozWebsocketClient *p, QObj
     context(Q_NULLPTR), wsi_prot1(Q_NULLPTR),
     was_closed(0), deny_deflate(0), deny_mux(0)
     {
-    qDebug("%s", __PRETTY_FUNCTION__);
+    qDebug("%s: this (%p)", __PRETTY_FUNCTION__, this);
 } 
 
 bozWebsocketClientPrivate::~bozWebsocketClientPrivate() {
-    qDebug("%s", __PRETTY_FUNCTION__);
+    qDebug("%s: this (%p)", __PRETTY_FUNCTION__, this);
     
 } 
 
 void bozWebsocketClientPrivate::disconnectFromHost() {
-
+    _thread->quit();
+    _thread->wait(20);
+//    libwebsocket_context_destroy(context);
+ //   context=NULL;
 }
 
 void bozWebsocketClientPrivate::connectToHost(const QHostAddress & address, quint16 port) {
@@ -42,10 +46,12 @@ void bozWebsocketClientPrivate::connectToHost(const QHostAddress & address, quin
     info.protocols = protocols;
     info.gid = -1;
     info.uid = -1;
+    info.user = this;
 
     context = libwebsocket_create_context(&info);
     if (!context) {
         qDebug("%s: Creating libwebsocket context failed", __PRETTY_FUNCTION__);
+        Q_EMIT q_ptr->error(QAbstractSocket::UnknownSocketError);
         return;
     }
     
@@ -55,6 +61,7 @@ void bozWebsocketClientPrivate::connectToHost(const QHostAddress & address, quin
     
     if (!wsi_prot1) {
         qDebug("%s: libwebsocket connect failed", __PRETTY_FUNCTION__);
+        Q_EMIT q_ptr->error(QAbstractSocket::UnknownSocketError);
         return;
     }
 
@@ -64,6 +71,7 @@ void bozWebsocketClientPrivate::connectToHost(const QHostAddress & address, quin
     }
     if(!_thread) {
         qDebug("%s: can't instanciate Ws Thread", __PRETTY_FUNCTION__);
+        Q_EMIT q_ptr->error(QAbstractSocket::UnknownSocketError);
         return;
     }
     if(!_thread->isRunning())
@@ -81,11 +89,17 @@ int bozWebsocketClientPrivate::prot0(struct libwebsocket_context *context,
     Q_UNUSED(wsi)
     
     bozWsPrivate_t *p_user = (bozWsPrivate_t*)user;
+    qDebug("private user (%p)", p_user);
     
     switch (reason) {
         
         case LWS_CALLBACK_CLIENT_ESTABLISHED:
             qDebug("callback_dumb_increment: LWS_CALLBACK_CLIENT_ESTABLISHED");
+            p_user->priv = (BOZ::bozWebsocketClientPrivate*)libwebsocket_context_user(context);
+            p_user->wsi = wsi;
+            qDebug("private ref (%p)", p_user->priv);
+            qDebug("q_ptr (%p)", p_user->priv->q_ptr);
+            Q_EMIT p_user->priv->q_ptr->connected();
             break;
             
         case LWS_CALLBACK_CLIENT_CONNECTION_ERROR:
@@ -95,10 +109,14 @@ int bozWebsocketClientPrivate::prot0(struct libwebsocket_context *context,
             
         case LWS_CALLBACK_CLOSED:
             qDebug("LWS_CALLBACK_CLOSED");
+            qDebug("private ref (%p)", p_user->priv);
+            qDebug("q_ptr (%p)", p_user->priv->q_ptr);
             p_user->priv->was_closed = 1;
+            Q_EMIT p_user->priv->q_ptr->disconnected();
             break;
             
         case LWS_CALLBACK_CLIENT_RECEIVE:
+            qDebug("private ref (%p)", p_user->priv);
             ((char *)in)[len] = '\0';
             qDebug("rx %d '%s'\n", (int)len, (char *)in);
             break;
@@ -118,6 +136,15 @@ int bozWebsocketClientPrivate::prot0(struct libwebsocket_context *context,
                 return 1;
             }
             break;
+                
+#define CASE_FDS(x) case x: qDebug("LWS_CALLBACK %s", #x); break;
+
+        CASE_FDS(LWS_CALLBACK_ADD_POLL_FD)
+        CASE_FDS(LWS_CALLBACK_DEL_POLL_FD)
+        CASE_FDS(LWS_CALLBACK_SET_MODE_POLL_FD)
+        CASE_FDS(LWS_CALLBACK_CLEAR_MODE_POLL_FD)
+        CASE_FDS(LWS_CALLBACK_PROTOCOL_INIT)
+        CASE_FDS(LWS_CALLBACK_PROTOCOL_DESTROY)
                 
         default:
             qDebug("LWS_CALLBACK default(%d)", reason);

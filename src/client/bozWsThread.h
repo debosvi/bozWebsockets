@@ -23,6 +23,7 @@ private:
 
 private:
     bozWebsocketClientPrivate *_owner;
+i   int quit;
 };
 
 }

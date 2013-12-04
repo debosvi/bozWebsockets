@@ -15,6 +15,7 @@ class bozWebsocketThread;
     
 typedef struct {
     bozWebsocketClientPrivate* priv;   
+    struct libwebsocket *wsi;   
 } bozWsPrivate_t;
 
 class bozWebsocketClientPrivate : public QObject {

@@ -21,6 +21,13 @@ public:
     ~bozWebsocketClient();
     virtual void connectToHost(const QHostAddress & address, quint16 port);    
     virtual void disconnectFromHost();
+
+Q_SIGNALS:
+    void connected();
+    void disconnected();
+    void readyRead();
+    void bytesWritten(qint64);
+    void error(QAbstractSocket::SocketError);
     
 private:
     bozWebsocketClientPrivate* const d_ptr;

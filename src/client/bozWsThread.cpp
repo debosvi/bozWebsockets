@@ -17,10 +17,10 @@ bozWebsocketThread::~bozWebsocketThread() {
 void bozWebsocketThread::run() {
     qDebug("%s", __PRETTY_FUNCTION__);
     
-    struct libwebsocket_context *context = _owner->getContext();
-    qDebug("%s: context(%p)", __PRETTY_FUNCTION__, context);
+        struct libwebsocket_context *context = _owner->getContext();
+        qDebug("%s: context(%p)", __PRETTY_FUNCTION__, context);
+    while(!quit) {
     
-    while(!isFinished()) {
 //        qDebug("%s: loop", __PRETTY_FUNCTION__);
 
         int n=libwebsocket_service(context, 10);
@@ -32,6 +32,7 @@ void bozWebsocketThread::run() {
         
  
     }
+    qDebug("%s: terminate", __PRETTY_FUNCTION__);
 }
 
 } // NAMESPACE
