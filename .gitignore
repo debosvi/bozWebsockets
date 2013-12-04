@@ -20,3 +20,4 @@ qrc_*.cpp
 
 # boz specific
 build
+.cmakebuilt

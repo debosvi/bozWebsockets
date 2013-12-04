@@ -1,0 +1,30 @@
+
+#ifndef _QBOZWSTHREAD_H_
+#define _QBOZWSTHREAD_H_
+
+#include <QtCore>
+
+#include "bozWsClient_p.h"
+#include "libwebsockets.h"
+
+namespace BOZ {
+
+class bozWebsocketThread : public QThread {
+    Q_OBJECT
+    
+public:
+    explicit bozWebsocketThread(bozWebsocketClientPrivate *p);
+    ~bozWebsocketThread();
+    
+Q_SIGNALS:
+
+private:
+    virtual void run();
+
+private:
+    bozWebsocketClientPrivate *_owner;
+};
+
+}
+
+#endif // _QBOZWSTHREAD_H_

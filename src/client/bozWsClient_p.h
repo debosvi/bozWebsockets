@@ -1,17 +1,17 @@
 
-#ifndef _QRTD_PROOF_PRIVATE_H_
-#define _QRTD_PROOF_PRIVATE_H_
+#ifndef _QBOZWEBSOCKETCLIENT_PRIVATE_H_
+#define _QBOZWEBSOCKETCLIENT_PRIVATE_H_
 
 #include <QtCore>
 #include <QtNetwork>
 
-#include "bozWsClient_p.h"
 #include "libwebsockets.h"
 
 namespace BOZ {
 
 class bozWebsocketClient;
 class bozWebsocketClientPrivate;
+class bozWebsocketThread;
     
 typedef struct {
     bozWebsocketClientPrivate* priv;   
@@ -21,11 +21,13 @@ class bozWebsocketClientPrivate : public QObject {
     Q_OBJECT
     Q_DISABLE_COPY(bozWebsocketClientPrivate)
     Q_DECLARE_PUBLIC(bozWebsocketClient)
+    friend bozWebsocketThread;
     
 public:
     explicit bozWebsocketClientPrivate(bozWebsocketClient *p, QObject *parent=Q_NULLPTR);
     ~bozWebsocketClientPrivate();
     void connectToHost(const QHostAddress & address, quint16 port);
+    void disconnectFromHost();
     
 Q_SIGNALS:
 
@@ -35,8 +37,12 @@ private:
                      enum libwebsocket_callback_reasons reason,
                      void *user, void *in, size_t len);
 
+protected:
+    struct libwebsocket_context* getContext();
+
 private:
     bozWebsocketClient * const q_ptr;
+    bozWebsocketThread* _thread;
     struct libwebsocket_protocols protocols[1];
     struct libwebsocket_context *context;
     struct libwebsocket *wsi_prot1;
@@ -47,4 +53,4 @@ private:
 
 }
 
-#endif // _QRTD_PROOF_PRIVATE_H_
+#endif // _QBOZWEBSOCKETCLIENT_PRIVATE_H_

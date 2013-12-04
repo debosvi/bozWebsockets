@@ -6,10 +6,12 @@ set(BOZ_WS_CLIENT_LIB bozWsClient)
 set(BOZ_WS_CLIENT_HDRS 
     ${PROJECT_SOURCE_DIR}/include/bozWebsocketClient.h
     bozWsClient_p.h
+    bozWsThread.h
     )
 
 set(BOZ_WS_CLIENT_SRCS 
     bozWsClient_p.cpp
+    bozWsThread.cpp
     bozWsConstructor.cpp
     bozWsConnect.cpp
     )

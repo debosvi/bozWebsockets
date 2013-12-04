@@ -5,14 +5,16 @@
 namespace BOZ {
     
 void bozWebsocketClient::connectToHost(const QHostAddress & address, quint16 port) {
-    Q_UNUSED(address)
-    Q_UNUSED(port)
-    
-    
+    qDebug("%s", __PRETTY_FUNCTION__);
+    Q_D(bozWebsocketClient);
+    qDebug() << address.toString(); 
+    d->connectToHost(address, port);    
 }
 
 void bozWebsocketClient::disconnectFromHost() {
-    
+    qDebug("%s", __PRETTY_FUNCTION__);
+    Q_D(bozWebsocketClient);
+    d->disconnectFromHost();    
 }
         
 } // NAMESPACE
