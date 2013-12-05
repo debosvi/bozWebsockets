@@ -5,8 +5,8 @@
 
 TestWs::TestWs() : QObject(0), _client(Q_NULLPTR) {
         _client = new BOZ::bozWebsocketClient(this);
-        connect(_client, SIGNAL(connected()), this, SLOT(onConnected()));
-        connect(_client, SIGNAL(disconnected()), this, SLOT(onDisconnected()));
+        connect(_client, SIGNAL(connected()), this, SLOT(onConnected()), Qt::DirectConnection);
+        connect(_client, SIGNAL(disconnected()), this, SLOT(onDisconnected()), Qt::DirectConnection);
     }
 
 TestWs::~TestWs() {
@@ -39,8 +39,24 @@ int main(int ac, char **av) {
 
     ws.connection();
     sleep(1);
+    ws.connection();
+    sleep(1);
     ws.disconnection();
     sleep(1);
+    ws.disconnection();
+    sleep(1);
+    ws.connection();
+    sleep(1);
+    ws.disconnection();
+    sleep(1);
+    ws.disconnection();
+    sleep(1);
+
+    QTimer t;
+    t.setInterval(6);
+    QObject::connect(&t, SIGNAL(timeout()), &app, SLOT(quit()));
+    t.setSingleShot(true);
+    t.start();
     
     return app.exec();
 }

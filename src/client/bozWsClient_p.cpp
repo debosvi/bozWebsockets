@@ -15,20 +15,45 @@ bozWebsocketClientPrivate::bozWebsocketClientPrivate(bozWebsocketClient *p, QObj
 
 bozWebsocketClientPrivate::~bozWebsocketClientPrivate() {
     qDebug("%s: this (%p)", __PRETTY_FUNCTION__, this);
+
+    if(wsi_prot1)
+        disconnectFromHost();
     
+    if(context)
+        libwebsocket_context_destroy(context);    
+
+    if(_thread)
+        delete _thread; 
 } 
 
+int bozWebsocketClientPrivate::getClosed() {
+    return was_closed;
+}
+
+struct libwebsocket* bozWebsocketClientPrivate::getWsi(int prot) {
+    if(!prot)
+        return wsi_prot1;
+    return NULL;
+}
+
 void bozWebsocketClientPrivate::disconnectFromHost() {
-    _thread->quit();
-    _thread->wait(20);
-//    libwebsocket_context_destroy(context);
- //   context=NULL;
+    qDebug("%s", __PRETTY_FUNCTION__);
+
+    if(_thread && wsi_prot1) {
+        QEventLoop ev(this);
+
+        connect(_thread, SIGNAL(finished()), &ev, SLOT(quit()));
+        _thread->quit();
+        ev.exec();
+        qDebug("%s: closed(%d)", __PRETTY_FUNCTION__, was_closed); 
+        wsi_prot1=Q_NULLPTR;
+    }
+//    Q_EMIT disconnected();
 }
 
 void bozWebsocketClientPrivate::connectToHost(const QHostAddress & address, quint16 port) {
     struct lws_context_creation_info info;
     int idx=0;
-    qDebug() << address.toString(); 
     qDebug("%s: address (%s), port(%d)", __PRETTY_FUNCTION__, address.toString().toLatin1().constData(), port); 
     
 //     protocols[idx].name = "http-only";
@@ -36,25 +61,34 @@ void bozWebsocketClientPrivate::connectToHost(const QHostAddress & address, quin
 //     protocols[idx].per_session_data_size = sizeof(bozWsPrivate_t);
 //     protocols[idx++].rx_buffer_size = 20;
 
-    protocols[idx].name = "dumb-increment-protocol";
-    protocols[idx].callback = prot0;
-    protocols[idx].per_session_data_size = sizeof(bozWsPrivate_t);
-    protocols[idx++].rx_buffer_size = 128;
+    if(!context) {
+        protocols[idx].name = "dumb-increment-protocol";
+        protocols[idx].callback = prot0;
+        protocols[idx].per_session_data_size = sizeof(bozWsPrivate_t);
+        protocols[idx++].rx_buffer_size = 128;
         
-    memset(&info, 0, sizeof(struct lws_context_creation_info));
-    info.port = 0;
-    info.protocols = protocols;
-    info.gid = -1;
-    info.uid = -1;
-    info.user = this;
+        memset(&info, 0, sizeof(struct lws_context_creation_info));
+        info.port = 0;
+        info.protocols = protocols;
+        info.gid = -1;
+        info.uid = -1;
+        info.user = this;
 
-    context = libwebsocket_create_context(&info);
-    if (!context) {
-        qDebug("%s: Creating libwebsocket context failed", __PRETTY_FUNCTION__);
+        context = libwebsocket_create_context(&info);
+
+        if (!context) {
+            qDebug("%s: Creating libwebsocket context failed", __PRETTY_FUNCTION__);
+            Q_EMIT q_ptr->error(QAbstractSocket::UnknownSocketError);
+            return;
+        }
+    }
+    
+    if(wsi_prot1) {
+        qDebug("%s: should disconnect previously, already connected", __PRETTY_FUNCTION__);
         Q_EMIT q_ptr->error(QAbstractSocket::UnknownSocketError);
         return;
     }
-    
+
     wsi_prot1 = libwebsocket_client_connect(context, address.toString().toLatin1().constData(), port, 0,
                                             "/", address.toString().toLatin1().constData(), address.toString().toLatin1().constData(),
                                            protocols[0].name, -1);
@@ -74,6 +108,8 @@ void bozWebsocketClientPrivate::connectToHost(const QHostAddress & address, quin
         Q_EMIT q_ptr->error(QAbstractSocket::UnknownSocketError);
         return;
     }
+
+    was_closed=0;
     if(!_thread->isRunning())
         _thread->start();
     
@@ -84,12 +120,12 @@ int bozWebsocketClientPrivate::prot0(struct libwebsocket_context *context,
           enum libwebsocket_callback_reasons reason,
           void *user, void *in, size_t len) {
 
-    qDebug("%s", __PRETTY_FUNCTION__);
+//    qDebug("%s", __PRETTY_FUNCTION__);
     Q_UNUSED(context)
     Q_UNUSED(wsi)
     
     bozWsPrivate_t *p_user = (bozWsPrivate_t*)user;
-    qDebug("private user (%p)", p_user);
+ //   qDebug("private user (%p)", p_user);
     
     switch (reason) {
         
@@ -109,14 +145,19 @@ int bozWebsocketClientPrivate::prot0(struct libwebsocket_context *context,
             
         case LWS_CALLBACK_CLOSED:
             qDebug("LWS_CALLBACK_CLOSED");
-            qDebug("private ref (%p)", p_user->priv);
-            qDebug("q_ptr (%p)", p_user->priv->q_ptr);
+   //         qDebug("private ref (%p)", p_user->priv);
+     //       qDebug("q_ptr (%p)", p_user->priv->q_ptr);
             p_user->priv->was_closed = 1;
             Q_EMIT p_user->priv->q_ptr->disconnected();
             break;
             
+        case LWS_CALLBACK_CLIENT_WRITEABLE:
+            qDebug("LWS_CALLBACK_CLIENT_WRITEABLE");
+            return -1;
+            break;
+            
         case LWS_CALLBACK_CLIENT_RECEIVE:
-            qDebug("private ref (%p)", p_user->priv);
+       //     qDebug("private ref (%p)", p_user->priv);
             ((char *)in)[len] = '\0';
             qDebug("rx %d '%s'\n", (int)len, (char *)in);
             break;

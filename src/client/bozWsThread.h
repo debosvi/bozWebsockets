@@ -15,6 +15,7 @@ class bozWebsocketThread : public QThread {
 public:
     explicit bozWebsocketThread(bozWebsocketClientPrivate *p);
     ~bozWebsocketThread();
+    void quit();
     
 Q_SIGNALS:
 
@@ -23,7 +24,7 @@ private:
 
 private:
     bozWebsocketClientPrivate *_owner;
-i   int quit;
+    int _quit;
 };
 
 }

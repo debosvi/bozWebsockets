@@ -40,6 +40,8 @@ private:
 
 protected:
     struct libwebsocket_context* getContext();
+    int getClosed();
+    struct libwebsocket *getWsi(int);
 
 private:
     bozWebsocketClient * const q_ptr;
