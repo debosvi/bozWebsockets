@@ -6,7 +6,8 @@
 namespace BOZ {
 
 bozWebsocketClientPrivate::bozWebsocketClientPrivate(bozWebsocketClient *p, QObject *parent) : 
-    QObject(parent), q_ptr(p), _thread(Q_NULLPTR), 
+    QObject(parent), q_ptr(p), 
+    _mutex(QMutex::Recursive), _thread(Q_NULLPTR), 
     context(Q_NULLPTR), wsi_prot1(Q_NULLPTR),
     was_closed(0), deny_deflate(0), deny_mux(0)
     {

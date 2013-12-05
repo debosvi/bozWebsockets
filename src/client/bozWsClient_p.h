@@ -48,6 +48,7 @@ protected:
 
 private:
     bozWebsocketClient * const q_ptr;
+    QMutex _mutex;
     QList<QByteArray> _data;
     bozWebsocketThread* _thread;
     struct libwebsocket_protocols protocols[1];
