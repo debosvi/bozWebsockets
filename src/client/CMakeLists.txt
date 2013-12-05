@@ -12,12 +12,14 @@ set(BOZ_WS_CLIENT_HDRS
 set(BOZ_WS_CLIENT_SRCS 
     bozWsClient_p.cpp
     bozWsCliRead_p.cpp
+    bozWsCliWrite_p.cpp
     bozWsCliConnect_p.cpp
     bozWsCliAccess_p.cpp
     bozWsThread.cpp
     bozWsConstructor.cpp
     bozWsConnect.cpp
     bozWsRead.cpp
+    bozWsWrite.cpp
     )
 
 QT5_WRAP_CPP(${BOZ_WS_CLIENT_LIB}_HEADERS_MOC ${BOZ_WS_CLIENT_HDRS})

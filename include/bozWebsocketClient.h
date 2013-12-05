@@ -23,6 +23,8 @@ public:
     virtual void disconnectFromHost();
     qint64 read(char *data, qint64 max);
     QByteArray read();
+    qint64 write(const char *data, qint64 max);
+    qint64 write(const QByteArray &a);
 
 Q_SIGNALS:
     void connected();

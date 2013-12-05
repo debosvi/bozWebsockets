@@ -13,6 +13,7 @@ void bozWebsocketClientPrivate::disconnectFromHost() {
 
         connect(_thread, SIGNAL(finished()), &ev, SLOT(quit()));
         _thread->quit();
+        was_quit=1;
         ev.exec();
         wsi_prot1=Q_NULLPTR;
     }
@@ -77,7 +78,7 @@ void bozWebsocketClientPrivate::connectToHost(const QHostAddress & address, quin
         return;
     }
 
-    was_closed=0;
+    was_quit=was_closed=0;
     if(!_thread->isRunning())
         _thread->start();
     
@@ -121,7 +122,30 @@ int bozWebsocketClientPrivate::prot0(struct libwebsocket_context *context,
             
         case LWS_CALLBACK_CLIENT_WRITEABLE:
             qDebug("LWS_CALLBACK_CLIENT_WRITEABLE");
-            return -1;
+            {
+                QByteArray a=p_user->priv->getData();
+                int lg=a.size();
+
+                qDebug("LWS_CALLBACK_CLIENT_WRITEABLE: size to send (%d)", lg);
+ 
+                if(a.size()) {
+                    char tmp[LWS_SEND_BUFFER_PRE_PADDING + lg + LWS_SEND_BUFFER_POST_PADDING];
+                    char *p=&tmp[LWS_SEND_BUFFER_PRE_PADDING];
+
+                    memcpy(p, a.constData(), lg);
+                    libwebsocket_write(wsi, (unsigned char *)p, lg, LWS_WRITE_BINARY);
+                    qDebug("LWS_CALLBACK_CLIENT_WRITEABLE: data sent");
+                }
+
+            }
+
+            if(p_user->priv->hasDataToWrite()) {
+                qDebug("LWS_CALLBACK_CLIENT_WRITEABLE: some more data (%d)", p_user->priv->hasDataToWrite());
+                libwebsocket_callback_on_writable(context, wsi);
+            }
+
+            if(p_user->priv->getQuit())
+                return -1;
             break;
             
         case LWS_CALLBACK_CLIENT_RECEIVE:

@@ -31,6 +31,8 @@ public:
     void disconnectFromHost();
     qint64 read(char *data, qint64 max);
     QByteArray read();
+    qint64 write(const char *data, qint64 max);
+    qint64 write(const QByteArray &a);
     
 Q_SIGNALS:
 
@@ -42,18 +44,23 @@ private:
 
 protected:
     struct libwebsocket_context* getContext();
+    int getQuit();
+    int hasDataToWrite();
     int getClosed();
     struct libwebsocket *getWsi(int);
     void storeData(const QByteArray &a);
+    QByteArray getData();
 
 private:
     bozWebsocketClient * const q_ptr;
     QMutex _mutex;
-    QList<QByteArray> _data;
+    QList<QByteArray> _rdata;
+    QList<QByteArray> _wdata;
     bozWebsocketThread* _thread;
     struct libwebsocket_protocols protocols[1];
     struct libwebsocket_context *context;
     struct libwebsocket *wsi_prot1;
+    int was_quit;
     int was_closed;
     int deny_deflate;
     int deny_mux;
