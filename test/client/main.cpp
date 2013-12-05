@@ -39,6 +39,11 @@ void TestWs::onData() {
     QByteArray data=_client->read();
     qDebug("%s: rx %d '%s'", __PRETTY_FUNCTION__, data.size(), data.constData());
 
+    if(!strncmp(data.constData(), "7", 1)) {
+        qDebug("%s: send reset", __PRETTY_FUNCTION__);
+        _client->write("reset\n", 6);
+    }
+
 }
 
 int main(int ac, char **av) {
