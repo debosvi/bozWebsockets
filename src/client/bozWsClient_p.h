@@ -29,6 +29,8 @@ public:
     ~bozWebsocketClientPrivate();
     void connectToHost(const QHostAddress & address, quint16 port);
     void disconnectFromHost();
+    qint64 read(char *data, qint64 max);
+    QByteArray read();
     
 Q_SIGNALS:
 
@@ -42,9 +44,11 @@ protected:
     struct libwebsocket_context* getContext();
     int getClosed();
     struct libwebsocket *getWsi(int);
+    void storeData(const QByteArray &a);
 
 private:
     bozWebsocketClient * const q_ptr;
+    QList<QByteArray> _data;
     bozWebsocketThread* _thread;
     struct libwebsocket_protocols protocols[1];
     struct libwebsocket_context *context;

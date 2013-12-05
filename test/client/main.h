@@ -16,6 +16,7 @@ public:
 private Q_SLOTS:
     void onConnected();
     void onDisconnected();
+    void onData();
 
 private:
     BOZ::bozWebsocketClient* _client;

@@ -21,6 +21,8 @@ public:
     ~bozWebsocketClient();
     virtual void connectToHost(const QHostAddress & address, quint16 port);    
     virtual void disconnectFromHost();
+    qint64 read(char *data, qint64 max);
+    QByteArray read();
 
 Q_SIGNALS:
     void connected();

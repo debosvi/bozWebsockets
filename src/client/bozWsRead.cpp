@@ -4,16 +4,16 @@
 
 namespace BOZ {
     
-void bozWebsocketClient::connectToHost(const QHostAddress & address, quint16 port) {
+qint64 bozWebsocketClient::read(char *data, qint64 max) {
 //    qDebug("%s", __PRETTY_FUNCTION__);
     Q_D(bozWebsocketClient);
-    d->connectToHost(address, port);    
-}
+    return d->read(data, max);    
+} 
 
-void bozWebsocketClient::disconnectFromHost() {
+QByteArray bozWebsocketClient::read() {
 //    qDebug("%s", __PRETTY_FUNCTION__);
     Q_D(bozWebsocketClient);
-    d->disconnectFromHost();    
+    return d->read();    
 }
         
 } // NAMESPACE

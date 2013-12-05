@@ -6,22 +6,22 @@ namespace BOZ {
 
 bozWebsocketThread::bozWebsocketThread(bozWebsocketClientPrivate *p) : 
     QThread(p), _owner(p), _quit(0) {
-    qDebug("%s", __PRETTY_FUNCTION__);
+//    qDebug("%s", __PRETTY_FUNCTION__);
 }
 
 bozWebsocketThread::~bozWebsocketThread() {
-    qDebug("%s", __PRETTY_FUNCTION__);
+//    qDebug("%s", __PRETTY_FUNCTION__);
 
 }
 
 void bozWebsocketThread::quit() {
-    qDebug("%s", __PRETTY_FUNCTION__);
+//    qDebug("%s", __PRETTY_FUNCTION__);
     _quit=1;
     QThread::quit();
 }
 
 void bozWebsocketThread::run() {
-    qDebug("%s", __PRETTY_FUNCTION__);
+//    qDebug("%s", __PRETTY_FUNCTION__);
     
     struct libwebsocket_context *context = _owner->getContext();
   //  qDebug("%s: context(%p)", __PRETTY_FUNCTION__, context);
