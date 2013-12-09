@@ -9,6 +9,8 @@
 
 namespace BOZ {
 
+#define BOZ_WS_PROT_MAX	64
+
 class bozWebsocketClient;
 class bozWebsocketClientPrivate;
 class bozWebsocketThread;
@@ -25,7 +27,7 @@ class bozWebsocketClientPrivate : public QObject {
     friend bozWebsocketThread;
     
 public:
-    explicit bozWebsocketClientPrivate(bozWebsocketClient *p, QObject *parent=Q_NULLPTR);
+    explicit bozWebsocketClientPrivate(const QString &protocol, bozWebsocketClient *p, QObject *parent=Q_NULLPTR);
     ~bozWebsocketClientPrivate();
     void connectToHost(const QHostAddress & address, quint16 port);
     void disconnectFromHost();
@@ -51,8 +53,12 @@ protected:
     void storeData(const QByteArray &a);
     QByteArray getData();
 
+public:
+    static const qint8 MaxProtocolLength;
+
 private:
     bozWebsocketClient * const q_ptr;
+    char _prot[BOZ_WS_PROT_MAX];;
     QMutex _mutex;
     QList<QByteArray> _rdata;
     QList<QByteArray> _wdata;

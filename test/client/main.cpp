@@ -4,7 +4,8 @@
 #include "main.h"
 
 TestWs::TestWs() : QObject(0), _client(Q_NULLPTR) {
-    _client = new BOZ::bozWebsocketClient(this);
+    QString prot = "dumb-increment-protocol";
+    _client = new BOZ::bozWebsocketClient(prot, this);
     connect(_client, SIGNAL(connected()), this, SLOT(onConnected()), Qt::DirectConnection);
     connect(_client, SIGNAL(disconnected()), this, SLOT(onDisconnected()), Qt::DirectConnection);
     connect(_client, SIGNAL(readyRead()), this, SLOT(onData()), Qt::DirectConnection);

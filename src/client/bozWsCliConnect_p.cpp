@@ -31,7 +31,8 @@ void bozWebsocketClientPrivate::connectToHost(const QHostAddress & address, quin
 //     protocols[idx++].rx_buffer_size = 20;
 
     if(!context) {
-        protocols[idx].name = "dumb-increment-protocol";
+        qDebug("%s: protocol (%s)", __PRETTY_FUNCTION__, _prot);
+        protocols[idx].name = _prot;
         protocols[idx].callback = prot0;
         protocols[idx].per_session_data_size = sizeof(bozWsPrivate_t);
         protocols[idx++].rx_buffer_size = 128;
