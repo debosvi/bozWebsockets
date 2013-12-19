@@ -4,8 +4,8 @@
 
 namespace BOZ {
     
-bozWebsocketClient::bozWebsocketClient(QObject *parent) : 
-    QObject(parent), d_ptr(new bozWebsocketClientPrivate(this)) {
+bozWebsocketClient::bozWebsocketClient(const QString &protocol, QObject *parent) : 
+    QObject(parent), d_ptr(new bozWebsocketClientPrivate(protocol, this, parent)) {
 //    qDebug("%s: this (%p)", __PRETTY_FUNCTION__, this);
 //     Q_D(bozWebsocketClient);
 }
